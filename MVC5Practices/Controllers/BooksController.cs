@@ -1,13 +1,16 @@
-﻿using System;
+﻿using MVC5Practices.Models;
+using MVC5Practices.Repositories;
+using MVC5Practices.Utils.DataTables;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using MVC5Practices.Models;
-using MVC5Practices.Repositories;
 
 namespace MVC5Practices.Controllers
 {
+    [RoutePrefix("api/books")]
     public class BooksController : ApiController
     {
         private readonly BookRepository _repository;
@@ -16,28 +19,35 @@ namespace MVC5Practices.Controllers
         {
             _repository = new BookRepository();
         }
-        
+
         /// <summary>
         /// Method to retrieve all of the books in the catalog.
         /// Example: GET api/books
         /// </summary>
-        [System.Web.Http.HttpGet]
-        public IHttpActionResult Get()
+        [HttpPost]
+        [Route("GetAll")]
+        public IHttpActionResult GetAllBooks(DataTablesRequest request)
         {
-            IEnumerable<BookDetails> books = _repository.ReadAllBooks();
-            if (books != null)
-            {
-                return Ok(books);
-            }
+            IEnumerable<BookDetails> books = _repository.ReadAllBooks().ToList();
 
-            return NotFound();
+            var paged = books.Skip(request.Start).Take(request.Length).ToList();
+
+            DataTablesResult result = new DataTablesResult
+            {
+                draw = request.Draw,
+                recordsFiltered = books.Count(),
+                recordsTotal = books.Count(),
+                data = paged.ToList()
+            };
+
+            return Ok(result);
         }
 
         /// <summary>
         /// Method to retrieve a specific book from the catalog.
         /// Example: GET api/books/5
         /// </summary>
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public IHttpActionResult Get(string id)
         {
             BookDetails book = _repository.ReadBook(id);
@@ -53,7 +63,7 @@ namespace MVC5Practices.Controllers
         /// Method to add a new book to the catalog.
         /// Example: POST api/books
         /// </summary>
-        [System.Web.Http.HttpPost]
+        [HttpPost]
         public HttpResponseMessage Post(BookDetails book)
         {
             if ((ModelState.IsValid) && (book != null))
@@ -74,7 +84,7 @@ namespace MVC5Practices.Controllers
         /// Method to update an existing book in the catalog.
         /// Example: PUT api/books/5
         /// </summary>
-        [System.Web.Http.HttpPut]
+        [HttpPut]
         public HttpResponseMessage Put(String id, BookDetails book)
         {
             if ((ModelState.IsValid) && (book != null) && (book.Id.Equals(id)))
@@ -96,7 +106,7 @@ namespace MVC5Practices.Controllers
         /// Method to remove an existing book from the catalog.
         /// Example: DELETE api/books/5
         /// </summary>
-        [System.Web.Http.HttpDelete]
+        [HttpDelete]
         public HttpResponseMessage Delete(String id)
         {
             BookDetails book = _repository.ReadBook(id);

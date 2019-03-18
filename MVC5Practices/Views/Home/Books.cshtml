@@ -1,17 +1,62 @@
 ﻿<div>
   <p>Books</p>
+  <table id="books" class="table table-striped table-bordered" style="width:100%">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Genre</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 <script type="text/javascript">
+
   $(document).ready(function () {
-    $.ajax({
-      type: "GET",
-      contentType: "application/json",
-      dataType: "json",
-      url: '/api/books'
-    }).done(function (data) {
-      console.log(data);
+    $('#books').DataTable({
+      "processing": true,
+      "serverSide": true,
+      //"ordering": false,
+      "ajax": {
+        "url":"/api/books/getall",
+        //"url": '@Url.Action("GetAllBooks", "Books")',
+        "type": "POST",
+        "contentType": "application/json",
+        "data": function ( d ) {
+          return JSON.stringify( d );
+        }
+        //"data": function(request) {
+        //  return JSON.stringify({
+        //    "dataTablesRequest": request
+        //  });
+        //}
+      },
+      "columns": [
+        { "data": "Id" },
+        { "data": "Title" },
+        { "data": "Author" },
+        { "data": "Genre" }
+      ]
     });
+
+    //$.ajax({
+    //  type: "GET",
+    //  contentType: "application/json",
+    //  dataType: "json",
+    //  url: '/api/books/getall'
+    //}).done(function (data) {
+    //  console.log(data);
+    //});
   });
 
 </script>

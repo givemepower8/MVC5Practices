@@ -34,10 +34,10 @@ namespace MVC5Practices.Controllers
 
             DataTablesResult result = new DataTablesResult
             {
-                draw = request.Draw,
-                recordsFiltered = books.Count(),
-                recordsTotal = books.Count(),
-                data = paged.ToList()
+                Draw = request.Draw,
+                RecordsFiltered = books.Count(),
+                RecordsTotal = books.Count(),
+                Data = paged.ToList()
             };
 
             return Ok(result);

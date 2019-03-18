@@ -6,17 +6,18 @@ namespace MVC5Practices.Utils.DataTables
     public class DataTablesResult
     {
         [JsonProperty(PropertyName = "draw")]
-        public int draw { get; set; }
+        public int Draw { get; set; }
 
         [JsonProperty(PropertyName = "recordsTotal")]
-        public int recordsTotal { get; set; }
+        public int RecordsTotal { get; set; }
 
         [JsonProperty(PropertyName = "recordsFiltered")]
-        public int recordsFiltered { get; set; }
+        public int RecordsFiltered { get; set; }
 
         [JsonProperty(PropertyName = "data")]
-        public IEnumerable data { get; set; }
+        public IEnumerable Data { get; set; }
 
-        public string error { get; set; }
+        [JsonProperty(PropertyName = "error")]
+        public string Error { get; set; }
     }
 }

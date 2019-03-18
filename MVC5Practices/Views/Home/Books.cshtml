@@ -1,5 +1,6 @@
 ﻿<div>
   <p>Books</p>
+  <button id="addBook">Add Book</button>
   <table id="books" class="table table-striped table-bordered" style="width:100%">
     <thead>
       <tr>
@@ -23,40 +24,65 @@
 <script type="text/javascript">
 
   $(document).ready(function () {
+
+    $('#addBook').click(function () {
+      var newBook = {
+        Title: "title",
+        Author: "author",
+        Genre: "Computer",
+        Price: 100,
+        PublishDate: "03-01-2018",
+        Description: "lorumm posum"
+      }
+
+      $.ajax({
+        type: "POST",
+        contentType: "application/json",
+        dataType: "json",
+        data: JSON.stringify(newBook),
+        url: '/api/books'
+      }).done(function (data) {
+        console.log(data);
+        $('#books').DataTable().draw();
+      }).fail(function (jqXHR, textStatus, err) {
+        if (jqXHR && jqXHR.responseJSON) {
+          console.log(jqXHR.responseJSON);
+        }
+        console.log(textStatus);
+        console.log(err);
+      });
+    });
+
     $('#books').DataTable({
       "processing": true,
       "serverSide": true,
       //"ordering": false,
       "ajax": {
-        "url":"/api/books/getall",
-        //"url": '@Url.Action("GetAllBooks", "Books")',
+        "url": "/api/books/getall",
         "type": "POST",
         "contentType": "application/json",
-        "data": function ( d ) {
-          return JSON.stringify( d );
+        "data": function (d) {
+          return JSON.stringify(d);
         }
-        //"data": function(request) {
-        //  return JSON.stringify({
-        //    "dataTablesRequest": request
-        //  });
-        //}
       },
       "columns": [
-        { "data": "Id" },
+        {
+          "data": "Id",
+          "render": function (data, type, full, meta) {
+            //console.log(data); //id
+            //console.log(type); //display
+            //console.log(full); //the whole json
+            //console.log(meta); //setting
+            return data;
+          }
+        },
         { "data": "Title" },
         { "data": "Author" },
         { "data": "Genre" }
       ]
     });
 
-    //$.ajax({
-    //  type: "GET",
-    //  contentType: "application/json",
-    //  dataType: "json",
-    //  url: '/api/books/getall'
-    //}).done(function (data) {
-    //  console.log(data);
-    //});
+
   });
 
 </script>

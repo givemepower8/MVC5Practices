@@ -8,7 +8,7 @@ namespace MVC5Practices.Models
     /// </summary>
     public class BookDetails
     {
-        [Required]
+        //[Required]
         public String Id { get; set; }
         [Required]
         public String Title { get; set; }

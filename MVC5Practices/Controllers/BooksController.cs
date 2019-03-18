@@ -64,20 +64,19 @@ namespace MVC5Practices.Controllers
         /// Example: POST api/books
         /// </summary>
         [HttpPost]
-        public HttpResponseMessage Post(BookDetails book)
+        public IHttpActionResult Post(BookDetails book)
         {
             if ((ModelState.IsValid) && (book != null))
             {
                 BookDetails newBook = _repository.CreateBook(book);
                 if (newBook != null)
                 {
-                    var httpResponse = Request.CreateResponse<BookDetails>(HttpStatusCode.Created, newBook);
-                    string uri = Url.Link("DefaultApi", new { id = newBook.Id });
-                    httpResponse.Headers.Location = new Uri(uri);
-                    return httpResponse;
+                    return CreatedAtRoute("DefaultApi", new {id = newBook.Id}, newBook);
                 }
             }
-            return Request.CreateResponse(HttpStatusCode.BadRequest);
+
+            return BadRequest(ModelState);
+            
         }
 
         /// <summary>
@@ -85,7 +84,7 @@ namespace MVC5Practices.Controllers
         /// Example: PUT api/books/5
         /// </summary>
         [HttpPut]
-        public HttpResponseMessage Put(String id, BookDetails book)
+        public HttpResponseMessage Put(string id, BookDetails book)
         {
             if ((ModelState.IsValid) && (book != null) && (book.Id.Equals(id)))
             {

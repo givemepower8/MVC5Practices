@@ -1,0 +1,17 @@
+﻿<div>
+  <p>Books</p>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function () {
+    $.ajax({
+      type: "GET",
+      contentType: "application/json",
+      dataType: "json",
+      url: '/api/books'
+    }).done(function (data) {
+      console.log(data);
+    });
+  });
+
+</script>

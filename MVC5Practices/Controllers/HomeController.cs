@@ -14,5 +14,12 @@ namespace MVC5Practices.Controllers
 
             return View();
         }
+
+        public ActionResult Books()
+        {
+            ViewBag.Title = "Books Page";
+
+            return View();
+        }
     }
 }

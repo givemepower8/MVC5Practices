@@ -4,8 +4,6 @@ using MVC5Practices.Utils.DataTables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 
 namespace MVC5Practices.Controllers
@@ -84,21 +82,19 @@ namespace MVC5Practices.Controllers
         /// Example: PUT api/books/5
         /// </summary>
         [HttpPut]
-        public HttpResponseMessage Put(string id, BookDetails book)
+        public IHttpActionResult Put(string id, BookDetails book)
         {
             if ((ModelState.IsValid) && (book != null) && (book.Id.Equals(id)))
             {
                 BookDetails modifiedBook = _repository.UpdateBook(id, book);
                 if (modifiedBook != null)
                 {
-                    return Request.CreateResponse<BookDetails>(HttpStatusCode.OK, modifiedBook);
+                    return Ok(modifiedBook);
                 }
-                else
-                {
-                    return Request.CreateResponse(HttpStatusCode.NotFound);
-                }
+
+                return NotFound();
             }
-            return Request.CreateResponse(HttpStatusCode.BadRequest);
+            return BadRequest(ModelState);
         }
 
         /// <summary>
@@ -106,21 +102,21 @@ namespace MVC5Practices.Controllers
         /// Example: DELETE api/books/5
         /// </summary>
         [HttpDelete]
-        public HttpResponseMessage Delete(String id)
+        public IHttpActionResult Delete(String id)
         {
             BookDetails book = _repository.ReadBook(id);
             if (book != null)
             {
                 if (_repository.DeleteBook(id))
                 {
-                    return Request.CreateResponse(HttpStatusCode.OK);
+                    return Ok();
                 }
             }
             else
             {
-                return Request.CreateResponse(HttpStatusCode.NotFound);
+                return NotFound();
             }
-            return Request.CreateResponse(HttpStatusCode.BadRequest);
+            return BadRequest();
         }
     }
 }

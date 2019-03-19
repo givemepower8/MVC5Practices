@@ -11,7 +11,7 @@ Web API exposes endpoints via routing.
 
 [Attribute Routing](https://docs.microsoft.com/en-us/aspnet/web-api/overview/web-api-routing-and-actions/create-a-rest-api-with-attribute-routing)
 
-## Restful
+### Restful
 - `api/resource` GET - get all
 - `api/resource` POST - create new entity
 - `api/resource/id` GET - get existing entity by id
@@ -31,22 +31,52 @@ A Web API controller action can return any of the following:
 3. IHttpActionResult - implement ExecuteAsync to create an HttpResponseMessage
 4. Any other type - Write the serialized return value into the response body; return 200 (OK).
 
-### HTTP POST Body
+## Parameter Binding
 
-### DTO
+User data is sent to action method (endpoint) via http and parameter binding.
 
-## Exception Handling
+[Parameter Binding in ASP.NET Web API](https://docs.microsoft.com/en-us/aspnet/web-api/overview/formats-and-model-binding/parameter-binding-in-aspnet-web-api)
 
-- [Exception Handling in ASP.NET Web API](https://docs.microsoft.com/en-us/aspnet/web-api/overview/error-handling/exception-handling)
-- [Global Error Handling in ASP.NET Web API 2](https://docs.microsoft.com/en-us/aspnet/web-api/overview/error-handling/web-api-global-error-handling)
 
-## JavaScript client
+### Form post
+
+`Content-Type: application/x-www-form-urlencoded`
+
+[Sending form data on MDN](https://developer.mozilla.org/en-US/docs/Learn/HTML/Forms/Sending_and_retrieving_form_data)
+
+[Post](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST)
+
+[Form Spec](https://www.w3.org/TR/html52/sec-forms.html)
+
+### JSON POST and Body
+
+`contentType: "application/json;charset=utf-8",`
+
+#### AJAX client
 
 It's done through the AJAX calls to the Restful services.
 
 JSON formatter is used.
 
 A typical ajax post sample
+```csharp
+[HttpPost]
+public IHttpActionResult Post(BookDetails book)
+{
+    if ((ModelState.IsValid) && (book != null))
+    {
+        BookDetails newBook = _repository.CreateBook(book);
+        if (newBook != null)
+        {
+            return CreatedAtRoute("DefaultApi", new {id = newBook.Id}, newBook);
+        }
+    }
+
+    return BadRequest(ModelState);
+            
+}
+```
+
 ```js
 var newBook = {
     Title: "title",
@@ -59,7 +89,7 @@ var newBook = {
 
 $.ajax({
     type: "POST",
-    contentType: "application/json",
+    contentType: "application/json;charset=utf-8",
     dataType: "json",
     data: JSON.stringify(newBook),
     url: '/api/books'
@@ -76,12 +106,41 @@ $.ajax({
 });
 ```
 
+In the above sample, Post method only has one parameter so the JSON.stringify(newBook) maps to BookDetails book as long as the properties are same. If you have multiple parameters, for example, Post(BookDetails book, Orders order), then in AJAX data, `var request = {"book": {...}, "order":{...} } ` and `data: JSON.stringify(request)` will be bound to the parameters.
+
 GET, PUT and DELETE are similar. 
 
-## Form post
+### Model binding
 
-[Sending form data on MDN](https://developer.mozilla.org/en-US/docs/Learn/HTML/Forms/Sending_and_retrieving_form_data)
+NVC has formatters and it extracts key values and binds them to the parameters in the action method.
 
-[Post](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST)
+#### Media formatter
 
-[Form Spec](https://www.w3.org/TR/html52/sec-forms.html)
+[Media formatter](https://docs.microsoft.com/en-us/aspnet/web-api/overview/formats-and-model-binding/media-formatters)
+
+[JSON and XML Serialization in ASP.NET Web API](https://docs.microsoft.com/en-us/aspnet/web-api/overview/formats-and-model-binding/json-and-xml-serialization)
+
+#### Content Negotiation
+
+[Content Negotiation in ASP.NET Web API](https://docs.microsoft.com/en-us/aspnet/web-api/overview/formats-and-model-binding/content-negotiation)
+
+### Validation
+
+[Model Validation in ASP.NET Web API](https://docs.microsoft.com/en-us/aspnet/web-api/overview/formats-and-model-binding/model-validation-in-aspnet-web-api)
+
+## Exception Handling
+
+- [Exception Handling in ASP.NET Web API](https://docs.microsoft.com/en-us/aspnet/web-api/overview/error-handling/exception-handling)
+- [Global Error Handling in ASP.NET Web API 2](https://docs.microsoft.com/en-us/aspnet/web-api/overview/error-handling/web-api-global-error-handling)
+
+## Message handlers
+
+## Response
+
+### Built-in Results
+
+[Built-in results](https://docs.microsoft.com/en-us/previous-versions/aspnet/dn314678%28v%3dvs.118%29)
+
+[Help methods](https://docs.microsoft.com/en-us/dotnet/api/system.web.http.apicontroller.badrequest?view=aspnetcore-2.2)
+
+### DTO

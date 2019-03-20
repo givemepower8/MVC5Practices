@@ -133,6 +133,27 @@ NVC has formatters and it extracts key values and binds them to the parameters i
 - [Exception Handling in ASP.NET Web API](https://docs.microsoft.com/en-us/aspnet/web-api/overview/error-handling/exception-handling)
 - [Global Error Handling in ASP.NET Web API 2](https://docs.microsoft.com/en-us/aspnet/web-api/overview/error-handling/web-api-global-error-handling)
 
+In Web API 2, if controller throws an uncaught exception, by default, most exceptions are translated into an HTTP response with status code 500, Internal Server Error.
+
+You can customize how Web API handles exceptions by writing an exception filter. It can be action-specific, controller-specific or global scope. An exception filter is executed when a controller method throws any unhandled exception that is not an HttpResponseException exception. The common usuage is when we need to log some specific exceptions. Instead of writting duplicated logging in the methods, we can handle it in a more maintainable way.
+
+But there are a number of cases that exception filters can't handle. For example:
+
+- Exceptions thrown from controller constructors.
+- Exceptions thrown from message handlers.
+- Exceptions thrown during routing.
+- Exceptions thrown during response content serialization.
+
+ IExceptionLogger and IExceptionHandler, are two user-replaceable services to log and handle unhandled exceptions. 
+
+- Exception loggers are the solution to seeing all unhandled exception caught by Web API.
+- Exception handlers are the solution for customizing all possible responses to unhandled exceptions caught by Web API.
+- Exception filters are the easiest solution for processing the subset unhandled exceptions related to a specific action or controller.
+
+HttpResponseException is a special case. It's not a real exception which you can use try catch. It is designed specifically for returning an HTTP response.
+
+The HttpError object provides a consistent way to return error information in the response body. 
+
 ## Message handlers
 
 ## Response
@@ -144,3 +165,20 @@ NVC has formatters and it extracts key values and binds them to the parameters i
 [Help methods](https://docs.microsoft.com/en-us/dotnet/api/system.web.http.apicontroller.badrequest?view=aspnetcore-2.2)
 
 ### DTO
+
+## Troubleshooting
+
+### Logging
+
+In ASP.NET MVC 5, ILogger is not abstracted like ASP.NET Core which is very flexible. If you are not switching logging providers later on, just stick to one provider and use singlton to reference the static logger.
+
+## Documention
+
+### Swagger
+
+[swagger-net](https://www.nuget.org/packages/Swagger-Net/) for ASP.NET Web API 2
+
+- [Swagger and ASP.NET Web API - Part 1](http://wmpratt.com/swagger-and-asp-net-web-api-part-1/)
+- [Swagger and ASP.NET Web API - Part 2](http://wmpratt.com/part-ii-swagger-and-asp-net-web-api-enabling-oauth2/)
+
+To use xml commment, in Project -> Build, specify the XML Documentation file. in SwaggerConfig.cs, there is ` c.IncludeAllXmlComments(thisAssembly, AppDomain.CurrentDomain.BaseDirectory);` which checks the project root folder and apply the xml dcomenention to action methods.

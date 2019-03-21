@@ -150,10 +150,87 @@ But there are a number of cases that exception filters can't handle. For example
 - Exception handlers are the solution for customizing all possible responses to unhandled exceptions caught by Web API.
 - Exception filters are the easiest solution for processing the subset unhandled exceptions related to a specific action or controller.
 
-HttpResponseException is a special case. It's not a real exception which you can use try catch. It is designed specifically for returning an HTTP response.
+```csharp
+public interface IExceptionLogger
+{
+   Task LogAsync(ExceptionLoggerContext context, 
+                 CancellationToken cancellationToken);
+}
+
+public interface IExceptionHandler
+{
+   Task HandleAsync(ExceptionHandlerContext context, 
+                    CancellationToken cancellationToken);
+}
+```
+
+Example
+```csharp
+public class SlabLogExceptionLogger : ExceptionLogger
+{
+    public override void Log(ExceptionLoggerContext context)
+    {
+        TestEvents.Log.UnhandledException(
+            context.Request.Method.ToString(),  
+            context.Request.RequestUri.ToString(), 
+            context.Exception.Message);
+    }
+}
+
+// in the WebApiConfig Register
+config.Services.Add(typeof(IExceptionLogger),  new SlabLogExceptionLogger());
+```
+
+HttpResponseException is a special case. It's not a real exception which you can use try catch. It is designed specifically for returning an HTTP response in the pipeline.
+
+```csharp
+public IEnumerable<string> GetBasicException()
+{
+    throw new HttpResponseException(HttpStatusCode.Moved);
+    return new string[] { "value1", "value2" };
+}
+```
+
+The client will immediately get a 301 moved response.
+
+```csharp
+var resp = new HttpResponseMessage(HttpStatusCode.BadRequest)
+{
+    Content = new StringContent(string.Format("id > 3, your value: {0}", id)),
+    ReasonPhrase = "Your id is too big"
+};
+throw new HttpResponseException(resp);
+```
+
+It can be used in the exp
+
+```csharp
+public class ValidationExceptionFilterAttribute : ExceptionFilterAttribute 
+{
+    public override void OnException(HttpActionExecutedContext context)
+    {
+        if (context.Exception is ValidationException)
+        {
+            var resp = new HttpResponseMessage(HttpStatusCode.BadRequest)
+            {
+                Content = new StringContent(context.Exception.Message),
+                ReasonPhrase = "ValidationException"
+            };
+            throw new HttpResponseException(resp);
+        }
+    }
+}
+```
 
 The HttpError object provides a consistent way to return error information in the response body. 
+```csharp
+ 
+var message = string.Format("id > 3 {0} ", id);
+HttpError err = new HttpError(message);
+err["error_id_Validation"] = 300;
+return Request.CreateResponse(HttpStatusCode.BadRequest, err);
 
+```
 ## Message handlers
 
 ## Response
@@ -182,3 +259,10 @@ In ASP.NET MVC 5, ILogger is not abstracted like ASP.NET Core which is very flex
 - [Swagger and ASP.NET Web API - Part 2](http://wmpratt.com/part-ii-swagger-and-asp-net-web-api-enabling-oauth2/)
 
 To use xml commment, in Project -> Build, specify the XML Documentation file. in SwaggerConfig.cs, there is ` c.IncludeAllXmlComments(thisAssembly, AppDomain.CurrentDomain.BaseDirectory);` which checks the project root folder and apply the xml dcomenention to action methods.
+
+## Resources
+
+### Offical
+
+- [ASP.NET Web API 2](https://docs.microsoft.com/en-us/aspnet/web-api/overview/)
+- [ASP.NET Web API 2 Samples](https://github.com/aspnet/samples/tree/master/samples/aspnet/WebApi)

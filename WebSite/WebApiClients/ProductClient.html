@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Product App</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-debug.js"></script>
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+    <div class="navbar navbar-inverse" role="navigation">
+        <a class="navbar-brand" href="#">STORE</a>
+    </div>
+
+    <div id="categories" class="col-xs-3">
+        <button class="btn btn-block btn-default btn-lg">
+            Home
+        </button>
+    </div>
+
+    <div class="alert alert-danger col-xs-8"
+         data-bind="visible: model.gotError(), text: model.error()">
+    </div>
+    <div class="col-xs-4">
+        <div class="row panel">
+            <div>
+                <div data-bind="foreach: model.products()">
+                    <div class="well">
+                        <h3>
+                            <strong data-bind="text: $data.Name"></strong>
+                            <span class="pull-right label label-primary" data-bind="text: ('$' + $data.Price.toFixed(2))"></span>
+                        </h3>
+                        <img class="img-rounded" data-bind="attr:{src: 'http://placehold.it/350x150?text='+$data.Name}">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var productUrl = "http://localhost:5000/api/product/";
+
+        var model = {
+            products: ko.observableArray([]),
+            orders: ko.observableArray([]),
+            authenticated: ko.observable(false),
+            username: ko.observable(null),
+            password: ko.observable(null),
+            error: ko.observable(""),
+            gotError: ko.observable(false)
+        };
+
+        var getProducts = function () {
+            sendRequest(productUrl,
+                "GET",
+                null,
+                function (data) {
+                    model.products.removeAll();
+                    model.products.push.apply(model.products, data);
+                });
+        };
+
+        var deleteProduct = function (id) {
+            sendRequest(productUrl + id, "DELETE", null, function () {
+                model.products.remove(function (item) {
+                    return item.Id === id;
+                });
+            });
+        }
+
+        var saveProduct = function (product, successCallback) {
+            sendRequest(productUrl, "POST", product, function () {
+                getProducts();
+                if (successCallback) {
+                    successCallback();
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            ko.applyBindings();
+
+            getProducts();
+
+            setDefaultCallbacks(
+                function (data) {
+                    if (data) {
+                        console.log("---Begin Success---");
+                        console.log(ko.toJSON(data, null, 2));
+                        console.log("---End Success---");
+                    } else {
+                        console.log("Success (no data)");
+                    }
+                    model.gotError(false);
+                },
+                function (statusCode, statusText) {
+                    console.log("Error: " + statusCode + " (" + statusText + ")");
+                    model.error(statusCode + " (" + statusText + ")");
+                    model.gotError(true);
+                }
+            );
+        });
+
+        var sendRequest = function (url, verb, data, successCallback, errorCallback, options) {
+
+            var requestOptions = options || {};
+            requestOptions.type = verb;
+            requestOptions.success = successCallback;
+            requestOptions.error = errorCallback;
+
+            if (!url || !verb) {
+                errorCallback(401, "URL and HTTP verb required");
+            }
+
+            if (data) {
+                requestOptions.data = data;
+            }
+            $.ajax(url, requestOptions);
+        }
+
+        var setDefaultCallbacks = function (successCallback, errorCallback) {
+            $.ajaxSetup({
+                complete: function (jqXHR, status) {
+                    if (jqXHR.status >= 200 && jqXHR.status < 300) {
+                        successCallback(jqXHR.responseJSON);
+                    } else {
+                        errorCallback(jqXHR.status, jqXHR.statusText);
+                    }
+                }
+            });
+        }
+
+        var setAjaxHeaders = function (requestHeaders) {
+            $.ajaxSetup({ headers: requestHeaders });
+        }
+
+    </script>
+</body>
+</html>

@@ -233,6 +233,10 @@ return Request.CreateResponse(HttpStatusCode.BadRequest, err);
 ```
 ## Message handlers
 
+## Action Filters
+
+[Web API 2 Using ActionFilterAttribute](https://damienbod.com/2014/01/04/web-api-2-using-actionfilterattribute-overrideactionfiltersattribute-and-ioc-injection/)
+
 ## Response
 
 ### Built-in Results
